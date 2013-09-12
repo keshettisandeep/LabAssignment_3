@@ -1,0 +1,78 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head><b>Mashup Application</b><br><br><br>
+  <br>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Search with Weather Mashup Example</title>
+    
+	Select Restaurants  <select class="inputdropdown_v3" onchange="OnLoad()" name="dropdown1" id="dropdown1"> 
+<option selected value="">Select Here</option> 
+<option value="Indian Restaurants">Indian Restaurants</option> 
+<option value="Chineese Restaurants">Chineese Restaurants</option> 
+
+</select><br><br><br>
+    <script src="https://www.google.com/jsapi"
+        type="text/javascript"></script>
+    <script language="Javascript" type="text/javascript">
+    //<!
+    google.load('search', '1');
+
+    function OnLoad() {
+      // Create a search control
+      var searchControl = new google.search.SearchControl();
+
+      // Add in a full set of searchers
+      var localSearch = new google.search.LocalSearch();
+      searchControl.addSearcher(localSearch);
+      searchControl.addSearcher(new google.search.WebSearch());
+     
+      localSearch.setCenterPoint("");
+
+      // tell the searcher to draw itself and tell it where to attach
+      searchControl.draw(document.getElementById("searchcontrol"));
+
+      // execute an inital search
+      searchControl.execute(document.getElementById("dropdown1").options[selectedIndex].value);
+    }
+    google.setOnLoadCallback(OnLoad);
+
+var echo = function(dataPass) {
+    $.ajax({
+        type: "POST",
+        url: "/echo/json/",
+        data: dataPass,
+        cache: false,
+        success: function(json) {
+            alert("UID=" + json.Id + "\nName=" + json.Name);
+        }
+    });
+};
+$('.list').live('click', function() {
+    $.get("http://vhost2203.site1.compute.ihost.com/aspnet_client/WcfService1/Service1.svc/data/10", function(data) {
+        var json = {
+            json: JSON.stringify(data),
+            delay: 1
+        };
+        echo(json);
+    });
+});
+    //]]>
+</script>
+  </head>
+  <script>
+jQuery(document).ready(function($) {
+  $.ajax({
+  url : "http://api.wunderground.com/api/77ebdad218982fdf/geolookup/conditions/q/MO/Kansas_City.json",
+  dataType : "jsonp",
+  success : function(parsed_json) {
+  var location = parsed_json['location']['city'];
+  var temp_f = parsed_json['current_observation']['temp_f'];
+  $("#weather").html("<b><p>Current weather in Kansas City, MO: " + "<font color='red'>" + temp_f + " F</font></b><i> (weather information provided by weather underground)</i></p>");
+  }
+  });
+});
+</script>
+  <body>
+  <div id="weather"></div>
+    <div id="searchcontrol">Loading</div>
+  </body>
+</html>
